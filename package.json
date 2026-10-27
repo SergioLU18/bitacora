@@ -16,15 +16,11 @@
     "db:push": "supabase db push --linked",
     "db:config": "supabase config push --project-ref gpneajxkshorrwwuljfo"
   },
-  "bitacora": {
-    "nativoMinimo": "1.0"
-  },
   "dependencies": {
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.3",
     "@capacitor/ios": "^8.5.3",
     "@capacitor/keyboard": "^8.0.6",
-    "@capgo/capacitor-updater": "^8.53.0",
     "@fontsource-variable/inter": "^5.3.0",
     "@fontsource-variable/rethink-sans": "^5.3.0",
     "@supabase/supabase-js": "^2.118.0",

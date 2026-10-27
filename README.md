@@ -39,26 +39,19 @@ npm run ios:abrir    # abre Xcode
 
 En Xcode: target **App → Signing & Capabilities**, elige tu equipo de Apple Developer y ejecuta en el iPhone conectado, o **Product → Archive → Distribute → TestFlight** para instalarla desde TestFlight.
 
-### Actualizaciones automáticas (live updates)
+### Cómo se actualiza la app del iPhone
 
-La app lleva empaquetado el build web (funciona sin conexión) y se actualiza sola desde GitHub Releases con [`@capgo/capacitor-updater`](https://github.com/Cap-go/capacitor-updater) en modo auto-hospedado, sin servidores de terceros:
+La app de iOS no lleva la web empaquetada: carga `https://bitacora-lophex.netlify.app` (`server.url` en `capacitor.config.ts`), el mismo sitio que se usa desde la computadora. Netlify compila y publica cada push a `main`, así que cada deploy llega al iPhone al abrir la app, sin reinstalar nada. Las variables de Supabase (`.env`) están configuradas en Netlify.
 
-1. Cada push a `main` ejecuta `.github/workflows/publicar-actualizacion.yml`: tests, build, `bundle.zip` + `latest.json` y una release `web-<build>`.
-2. Al abrirse o volver a primer plano, la app lee `releases/latest/download/latest.json` (`src/lib/actualizaciones.ts`). Si el bundle es más nuevo, lo descarga, verifica el SHA-256 y lo aplica la próxima vez que la app pasa a segundo plano. Los datos (IndexedDB) se conservan.
-3. Si un bundle no arranca (no llega a llamar a `notifyAppReady`), el plugin vuelve automáticamente al anterior.
+Sin conexión, Capacitor muestra `public/offline.html` (empaquetada en la app) y reintenta sola hasta que el sitio responde. Los datos siguen en el dispositivo (IndexedDB del sitio) y se sincronizan al volver la red.
 
-Cuando la descarga termina aparece un aviso «Versión nueva lista · Actualizar» para aplicarla sin salir de la app. En **Ajustes → Actualizaciones** se ve la versión instalada (con la fecha del commit), el estado (buscando, descargando, lista o al día) y los botones «Buscar actualizaciones» y «Actualizar ahora». En la web solo se muestra la versión.
-
-El número de build es la fecha del último commit, así que un build local del mismo commit no se "actualiza" a sí mismo.
-
-**Requisito:** el repositorio debe ser público para que la app pueda descargar las releases (o define `VITE_URL_ACTUALIZACIONES` con otra URL que sirva `latest.json`).
+En **Ajustes** se ve la versión de la web en uso con la fecha del commit.
 
 ### Cuándo hace falta recompilar en Xcode
 
-Las live updates solo cambian HTML/CSS/JS. Hay que generar un binario nuevo (Xcode/TestFlight) al añadir o actualizar plugins nativos, cambiar `capacitor.config.ts`, el icono, permisos de `Info.plist` o el widget. En ese caso:
+Solo cuando cambia algo nativo: añadir o actualizar plugins de Capacitor, `capacitor.config.ts`, el icono, permisos de `Info.plist` o el widget. En ese caso sube `MARKETING_VERSION` en Xcode (p. ej. `1.0` → `1.1`) y distribuye por TestFlight.
 
-1. Sube `MARKETING_VERSION` en Xcode (p. ej. `1.0` → `1.1`).
-2. Si la web nueva depende de ese binario, sube `bitacora.nativoMinimo` en `package.json` al mismo valor: los iPhones con el binario antiguo no recibirán bundles incompatibles.
+Para probar en el iPhone un build local en vez del sitio publicado, comenta `server` en `capacitor.config.ts` y corre `npm run ios`.
 
 ## Sincronización (Supabase)
 
@@ -70,7 +63,7 @@ Proyecto `bitacora` (ref `gpneajxkshorrwwuljfo`, org Lophex, `us-east-1`).
 - **Esquema** (`supabase/migrations`): una tabla por entidad (`proyectos`, `tareas`, `notas`, `archivos`, `historial`) con la entidad completa en `datos` (jsonb), así un campo nuevo no requiere migración. RLS: cada usuario solo ve y escribe lo suyo; no hay borrado físico.
 - **Archivos:** los datos del archivo (nombre, tipo, tamaño) viajan en la tabla `archivos` como cualquier entidad; el contenido va al bucket privado `archivos` de Storage, en `<user_id>/<archivo_id>`, y las políticas de `storage.objects` limitan cada cuenta a su carpeta. Al agregar un archivo se guarda primero en el dispositivo (tabla local `contenidos`, como bytes y con `subido` 0/1; no como Blob, porque WebKit puede vaciar o enviar con 0 bytes un Blob leído de IndexedDB) y `SubidaArchivos` lo sube después de sincronizar los datos. Los demás dispositivos no descargan nada por adelantado: lo abren con un enlace temporal (1 h). Máximo 50 MB por archivo (el límite del plan gratuito).
 - **Cuenta:** en Ajustes → Cuenta y sincronización se entra con correo y contraseña. La primera vez (o si se olvida la contraseña) se entra con un código de 6 dígitos por correo; una cuenta sin contraseña recibe en ese momento el aviso «Crea tu contraseña». Como Supabase no expone si un usuario tiene contraseña, la app anota `contrasena_definida: true` en `user_metadata` al crearla. Mínimo 8 caracteres (`minimum_password_length`). El registro abierto está cerrado porque la clave publishable viaja dentro de la app: es pública por diseño y la seguridad la dan las RLS. Para dar acceso a otro correo, créalo en el panel (Authentication → Users → Add user).
-- **Secretos:** `.env` (URL y clave publishable; copia `.env.example`) y `.env.local` (contraseña de la base) no se versionan. El CI toma los dos valores de `.env` de los secretos del repositorio `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. La clave secreta / `service_role` nunca entra al repositorio.
+- **Secretos:** `.env` (URL y clave publishable; copia `.env.example`) y `.env.local` (contraseña de la base) no se versionan. Netlify los tiene como variables de entorno del sitio. La clave secreta / `service_role` nunca entra al repositorio.
 - Al cerrar sesión los datos se quedan en el dispositivo. Si entra otra cuenta, lo que hay en el dispositivo se sube a esa cuenta.
 - El correo de Supabase sin SMTP propio permite pocos envíos por hora; para uso personal basta. Si hiciera falta, configura un SMTP en `[auth.email.smtp]`.
 

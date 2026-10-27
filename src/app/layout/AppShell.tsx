@@ -9,7 +9,6 @@ import { useAhora } from '../../hooks/useAhora';
 import { useAtajos } from '../../hooks/useAtajos';
 import { useEnlacesExternos } from '../../hooks/useEnlacesExternos';
 import { ConfirmarProvider } from '../../ui/Confirmar';
-import { AvisoActualizacion } from '../../features/cuenta/SeccionActualizaciones';
 import { ToastProvider } from '../../ui/Toast';
 import { AjustesProvider, useAjustes } from '../AjustesProvider';
 import { BottomNav } from './BottomNav';
@@ -30,7 +29,6 @@ export function AppShell() {
           <EditorTareaProvider>
             <EditorProyectoProvider>
               <Layout />
-              <AvisoActualizacion />
             </EditorProyectoProvider>
           </EditorTareaProvider>
         </AjustesProvider>

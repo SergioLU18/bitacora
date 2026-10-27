@@ -6,8 +6,6 @@ declare const __BUILD_WEB__: number;
 declare const __VERSION_WEB__: string;
 
 interface ImportMetaEnv {
-  /** URL del manifiesto de actualizaciones en vivo (latest.json). */
-  readonly VITE_URL_ACTUALIZACIONES?: string;
   /** Proyecto de Supabase para sincronizar entre dispositivos (.env). Sin él, la app funciona solo en local. */
   readonly VITE_SUPABASE_URL?: string;
   /** Clave publishable (pública) de Supabase. */

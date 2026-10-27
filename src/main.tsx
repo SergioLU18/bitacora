@@ -8,12 +8,10 @@ import { BitacoraDB } from './data/repositories/dexie/db';
 import { obtenerResumenPendientes } from './data/resumen';
 import { ServicioSync } from './data/sync/servicio';
 import { crearClienteSupabase } from './data/sync/supabase';
-import { iniciarActualizaciones } from './lib/actualizaciones';
 import { iniciarTeclado } from './lib/teclado';
 import { iniciarWidget } from './lib/widget';
 import './styles/index.css';
 
-iniciarActualizaciones();
 iniciarTeclado();
 
 // Una sola base local: la usan los repositorios (la app) y la sincronización con Supabase.

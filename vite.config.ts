@@ -14,9 +14,8 @@ function git(comando: string): string | null {
   }
 }
 
-// Número de build de la web: la fecha (segundos Unix) del último commit. Crece con cada commit,
-// coincide entre el build local y el de CI del mismo commit, y permite decidir si un bundle es más nuevo.
-const build = Number(process.env.BITACORA_BUILD ?? git('log -1 --format=%ct') ?? 0);
+// Número de build de la web: la fecha (segundos Unix) del último commit. Ajustes lo muestra como fecha de publicación.
+const build = Number(git('log -1 --format=%ct') ?? 0);
 const commit = git('rev-parse --short HEAD') ?? 'local';
 
 export default defineConfig({

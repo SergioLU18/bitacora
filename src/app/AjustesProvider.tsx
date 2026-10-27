@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
-import { SeccionActualizaciones } from '../features/cuenta/SeccionActualizaciones';
+import { SeccionVersion } from '../features/cuenta/SeccionVersion';
 import { SeccionCuenta } from '../features/cuenta/SeccionCuenta';
 import { IDIOMAS, nombreIdioma, useI18n } from '../i18n/I18nProvider';
 import { Segmentado } from '../ui/Campos';
@@ -61,7 +61,7 @@ export function AjustesProvider({ children }: { children: ReactNode }) {
               ))}
             </dl>
           </section>
-          <SeccionActualizaciones />
+          <SeccionVersion />
         </div>
       </Sheet>
     </AjustesContext.Provider>

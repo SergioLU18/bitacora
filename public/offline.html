@@ -1,0 +1,133 @@
+<!doctype html>
+<!--
+  Pantalla de "sin conexión" de la app de iOS. Capacitor la muestra (server.errorPath en
+  capacitor.config.ts) cuando no puede cargar Bitácora desde Netlify. Va empaquetada dentro de
+  la app, así que todo está en este archivo (sin React, sin fuentes externas): en modo error
+  Capacitor solo sirve este archivo, no el resto de public/.
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Sin conexión · Bitácora</title>
+    <style>
+      :root {
+        --fondo: #f6f8f9;
+        --tarjeta: #ffffff;
+        --texto: #15232b;
+        --texto-2: #5b6b74;
+        --borde: #e2e8eb;
+        --acento: #008898;
+        --acento-activo: #006e7b;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --fondo: #0b0f12;
+          --tarjeta: #141a1f;
+          --texto: #eef2f4;
+          --texto-2: #9aa7ae;
+          --borde: #232c32;
+          --acento: #00caed;
+          --acento-activo: #00a9c7;
+        }
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      html, body { height: 100%; }
+      body {
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        background: var(--fondo);
+        color: var(--texto);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        padding-top: calc(24px + env(safe-area-inset-top, 0px));
+        padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      }
+      .tarjeta {
+        background: var(--tarjeta);
+        border: 1px solid var(--borde);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 420px;
+        padding: 36px 28px 28px;
+        text-align: center;
+      }
+      .logo { width: 72px; height: 72px; margin: 0 auto 20px; display: block; }
+      h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 10px; }
+      p { font-size: 15px; color: var(--texto-2); line-height: 1.5; }
+      button {
+        font: inherit;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        background: var(--acento);
+        border: none;
+        border-radius: 14px;
+        width: 100%;
+        padding: 14px;
+        margin-top: 24px;
+        cursor: pointer;
+      }
+      button:active { background: var(--acento-activo); }
+      button:disabled { opacity: 0.6; }
+      .estado {
+        margin-top: 14px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .punto {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--acento);
+        animation: latido 1.4s ease-in-out infinite;
+      }
+      @keyframes latido { 50% { opacity: 0.25; } }
+    </style>
+  </head>
+  <body>
+    <main class="tarjeta">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#008898"/><path d="M9 16.5l4.5 4.5L23 11.5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h1>Sin conexión</h1>
+      <p>Bitácora necesita internet para abrirse. Tus datos siguen guardados y se sincronizarán al volver la conexión.</p>
+      <button id="reintentar" type="button">Reintentar</button>
+      <p class="estado"><span class="punto"></span><span id="estado">Reintentando automáticamente…</span></p>
+    </main>
+
+    <script>
+      // Misma URL que URL_APP en capacitor.config.ts.
+      var URL_APP = 'https://bitacora-lophex.netlify.app/';
+      var boton = document.getElementById('reintentar');
+      var estado = document.getElementById('estado');
+
+      // Antes de navegar se comprueba que el sitio responda; si no, al fallar la carga
+      // Capacitor volvería a esta misma pantalla con un parpadeo.
+      var probando = false;
+      function probar(manual) {
+        if (probando) return;
+        probando = true;
+        if (manual) { boton.disabled = true; boton.textContent = 'Conectando…'; }
+        fetch(URL_APP, { mode: 'no-cors', cache: 'no-store' })
+          .then(function () {
+            estado.textContent = 'Conexión recuperada, abriendo Bitácora…';
+            location.replace(URL_APP);
+          })
+          .catch(function () {
+            probando = false;
+            boton.disabled = false;
+            boton.textContent = 'Reintentar';
+            if (manual) estado.textContent = 'Todavía sin conexión. Seguimos intentando…';
+          });
+      }
+
+      boton.addEventListener('click', function () { probar(true); });
+      window.addEventListener('online', function () { probar(false); });
+      setInterval(function () { probar(false); }, 5000);
+    </script>
+  </body>
+</html>
