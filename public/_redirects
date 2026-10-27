@@ -1,0 +1,2 @@
+# Netlify: la app es una SPA (react-router); toda ruta la resuelve index.html.
+/*  /index.html  200
