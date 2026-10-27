@@ -1,0 +1,324 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/rethink-sans';
+
+/*
+ * Tokens de diseño de Bitácora, con la identidad de Lophex Digital (brandbook):
+ * teal #008898 y cian #00CAED sobre neutros fríos (navy #0B1A22 / blanco).
+ * El color se reserva para lo que importa: deadlines, prioridad y proyectos.
+ * Títulos en Rethink Sans, texto en Inter. Los tonos de texto cumplen contraste AA sobre su fondo.
+ */
+:root {
+  color-scheme: light;
+  /* Altura del teclado nativo (src/lib/teclado.ts). 0 en web. */
+  --teclado: 0px;
+  --fondo: #f5f8f9;
+  --superficie: #ffffff;
+  --superficie-2: #eef3f5;
+  --superficie-3: #e0e8eb;
+  --borde: #e0e8eb;
+  --borde-fuerte: #c9d6db;
+  --texto: #0b1a22;
+  --texto-2: #5c6b73;
+  --texto-3: #93a1a8;
+
+  --acento: #008898;
+  --acento-hover: #00727f;
+  --acento-suave: #e3f5f8;
+  --sobre-acento: #ffffff;
+
+  --peligro: #dc2626;
+  --peligro-suave: #fef2f2;
+  --aviso: #b45309;
+  --aviso-borde: #d97706;
+  --aviso-suave: #fffbeb;
+  --info: #0369a1;
+  --info-suave: #f0f9ff;
+
+  --sombra-elevada: 0 1px 2px rgb(11 26 34 / 0.04), 0 8px 24px -6px rgb(11 26 34 / 0.12);
+  --fondo-modal: rgb(11 26 34 / 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fondo: #0a1014;
+    --superficie: #111a1f;
+    --superficie-2: #18242a;
+    --superficie-3: #223037;
+    --borde: #1f2c33;
+    --borde-fuerte: #2f404a;
+    --texto: #f2f6f7;
+    --texto-2: #9fadb4;
+    --texto-3: #65747c;
+
+    --acento: #00caed;
+    --acento-hover: #4fdcf5;
+    --acento-suave: rgb(0 202 237 / 0.14);
+    --sobre-acento: #061218;
+
+    --peligro: #f87171;
+    --peligro-suave: rgb(248 113 113 / 0.12);
+    --aviso: #fbbf24;
+    --aviso-borde: #fbbf24;
+    --aviso-suave: rgb(251 191 36 / 0.12);
+    --info: #38bdf8;
+    --info-suave: rgb(56 189 248 / 0.12);
+
+    --sombra-elevada: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.6);
+    --fondo-modal: rgb(0 0 0 / 0.6);
+  }
+}
+
+@theme inline {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-titulo: 'Rethink Sans Variable', 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-superficie-2: var(--superficie-2);
+  --color-superficie-3: var(--superficie-3);
+  --color-borde: var(--borde);
+  --color-borde-fuerte: var(--borde-fuerte);
+  --color-texto: var(--texto);
+  --color-texto-2: var(--texto-2);
+  --color-texto-3: var(--texto-3);
+  --color-acento: var(--acento);
+  --color-acento-hover: var(--acento-hover);
+  --color-acento-suave: var(--acento-suave);
+  --color-sobre-acento: var(--sobre-acento);
+  --color-peligro: var(--peligro);
+  --color-peligro-suave: var(--peligro-suave);
+  --color-aviso: var(--aviso);
+  --color-aviso-borde: var(--aviso-borde);
+  --color-aviso-suave: var(--aviso-suave);
+  --color-info: var(--info);
+  --color-info-suave: var(--info-suave);
+
+  --shadow-elevada: var(--sombra-elevada);
+
+  --animate-entrada: entrada 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-aparecer: aparecer 160ms ease-out;
+}
+
+/* --- Base ------------------------------------------------------------------ */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  @apply bg-fondo font-sans text-texto antialiased;
+  font-feature-settings: 'cv11', 'ss01';
+  overscroll-behavior-y: none;
+}
+
+/* Bloquea el scroll del fondo mientras hay un sheet o diálogo abierto. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* En la capa base para que las utilidades (focus:outline-none, focus:ring-*) puedan anularlo. */
+@layer base {
+  /* Tipografía principal de la marca para títulos; el cuerpo sigue en Inter. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-titulo);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--acento);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+::selection {
+  background: var(--acento-suave);
+}
+
+/* En WebKit (iOS) los campos de fecha/hora tienen un ancho intrínseco e ignoran el ancho de su
+   columna: dos en la misma fila se encimaban. Sin apariencia nativa respetan el ancho que se les da. */
+input[type='date'],
+input[type='time'] {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 2.75rem;
+  appearance: none;
+  -webkit-appearance: none;
+}
+input::-webkit-date-and-time-value {
+  text-align: start;
+}
+
+/* --- Safe areas (notch, isla dinámica, barra de inicio) --------------------- */
+
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility px-safe {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+@utility scrollbar-oculta {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* --- Sheets y diálogos (<dialog> nativo) ------------------------------------ */
+
+dialog.bitacora-dialogo {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: visible;
+}
+dialog.bitacora-dialogo::backdrop {
+  background: var(--fondo-modal);
+  animation: aparecer 200ms ease-out;
+}
+dialog.bitacora-dialogo[data-cerrando]::backdrop {
+  animation: desvanecer 180ms ease-in forwards;
+}
+
+/* Sheet: inferior en móvil, centrado en escritorio. Sube con el teclado nativo sin que el
+   WebView cambie de tamaño; la transición dura lo mismo que la animación del teclado de iOS. */
+dialog.bitacora-sheet {
+  width: 100%;
+  margin: auto 0 0 0;
+  padding-bottom: var(--teclado);
+  transition: padding-bottom 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+dialog.bitacora-sheet > .bitacora-panel {
+  max-height: calc(92dvh - var(--teclado));
+  transition: max-height 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+dialog.bitacora-sheet[open] > .bitacora-panel {
+  animation: sheet-entrada 280ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+dialog.bitacora-sheet[data-cerrando] > .bitacora-panel {
+  animation: sheet-salida 200ms ease-in forwards;
+}
+
+/* Diálogo de confirmación: siempre centrado. */
+dialog.bitacora-modal {
+  width: calc(100% - 2rem);
+  max-width: 26rem;
+  margin: auto;
+}
+
+@media (min-width: 48rem) {
+  dialog.bitacora-sheet {
+    width: calc(100% - 2rem);
+    max-width: 34rem;
+    margin: auto;
+  }
+  dialog.bitacora-sheet > .bitacora-panel {
+    max-height: calc(85dvh - var(--teclado));
+  }
+}
+
+dialog.bitacora-modal[open] > .bitacora-panel {
+  animation: modal-entrada 200ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+dialog.bitacora-modal[data-cerrando] > .bitacora-panel {
+  animation: modal-salida 150ms ease-in forwards;
+}
+@media (min-width: 48rem) {
+  dialog.bitacora-sheet[open] > .bitacora-panel {
+    animation: modal-entrada 200ms cubic-bezier(0.2, 0.9, 0.25, 1);
+  }
+  dialog.bitacora-sheet[data-cerrando] > .bitacora-panel {
+    animation: modal-salida 150ms ease-in forwards;
+  }
+}
+
+/* --- Animaciones -------------------------------------------------------------- */
+
+@keyframes entrada {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes desvanecer {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sheet-entrada {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes sheet-salida {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes modal-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+@keyframes modal-salida {
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+}
+@keyframes toast-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+}
+@keyframes check-pop {
+  40% {
+    transform: scale(1.18);
+  }
+}
+@keyframes trazo {
+  from {
+    stroke-dashoffset: 16;
+  }
+}
+
+.animate-toast {
+  animation: toast-entrada 240ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+.animate-check-pop {
+  animation: check-pop 280ms ease-out;
+}
+.animate-trazo {
+  stroke-dasharray: 16;
+  animation: trazo 260ms ease-out 60ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  dialog::backdrop {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
